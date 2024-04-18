@@ -1,5 +1,5 @@
 const express = require('express');
-const {handleGetAllUsers,handleCreateNewUser, handleGetUserById,handleUpdateUserById,handleDeleteUserById} = require('../controllers/user');
+const {handleGetAllUsers,handleCreateNewUser, handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI} = require('../controllers/user');
 
 const router = express.Router();
 
@@ -12,4 +12,8 @@ router
     .patch(handleUpdateUserById)
     .delete(handleDeleteUserById);
 
-module.exports = router; 
+router
+    .route("/ui")
+    .get(handleGetAllUsersInUI);
+
+module.exports = router;

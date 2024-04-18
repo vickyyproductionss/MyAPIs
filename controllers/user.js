@@ -46,6 +46,17 @@ async function handleCreateNewUser(req,res)
 
     return res.status(201).json({msg: "success",id:result._id});
 }
+
+async function handleGetAllUsersInUI(req,res)
+{
+    try {
+        const users = await User.find({});
+        res.render('users', { users }); // Render 'users.ejs' template with all users data
+      } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+      }
+}
 module.exports = {
-    handleGetAllUsers,handleCreateNewUser,handleGetUserById,handleUpdateUserById,handleDeleteUserById
+    handleGetAllUsers,handleCreateNewUser,handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI
 }
