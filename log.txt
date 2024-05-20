@@ -76,3 +76,23 @@
 1713390541679:::1GET:/api/users
 
 1713390599681:::1GET:/api/users
+
+1713594759277:::1GET:/favicon.ico
+
+1716183061102:::1GET:/api/support/get/server
+
+1716183092776:::1GET:/api/support/get/server
+
+1716183109135:::1POST:/api/support/get/server
+
+1716183115506:::1GET:/api/support/get/server
+
+1716183208666:::1GET:/api/support/get/server
+
+1716183213903:::1POST:/api/support/get/server
+
+1716183217211:::1GET:/api/support/get/server
+
+1716183265729:::1POST:/api/support/get/server
+
+1716183269868:::1GET:/api/support/get/server
