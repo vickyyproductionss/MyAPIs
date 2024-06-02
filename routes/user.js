@@ -1,6 +1,7 @@
 const express = require('express');
 const {handleGetAllUsers,handleGetUserProfilePicture,handleCreateNewUser, handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI} = require('../controllers/user');
 const {incrementAppOpen} = require("../controllers/AppOpen")
+const hitCounterController = require('../controllers/hitCounterController');
 const router = express.Router();
 
 //REST APIs
@@ -22,5 +23,6 @@ router
 
 
 router.route("/appopen").get(incrementAppOpen);
+router.route("/hitlink").get(hitCounterController);
 
 module.exports = router;
