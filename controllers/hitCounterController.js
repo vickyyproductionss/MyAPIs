@@ -2,7 +2,7 @@
 
 const HitCounter = require('../models/HitCounter');
 
-exports.incrementHitCounter = async (req, res) => {
+async function incrementHitCounter(req, res){
   const { id } = req.query; // Assuming the id is sent as a query parameter
 
   if (!id) {
@@ -24,3 +24,8 @@ exports.incrementHitCounter = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error });
   }
 };
+
+
+module.exports = {
+    incrementHitCounter
+}
