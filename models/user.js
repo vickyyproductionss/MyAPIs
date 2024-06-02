@@ -1,26 +1,23 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    firstname:{
+    sender_id:{
         type: String,
         required: true,
     },
-    lastname: {
+    sender_name:{
         type: String,
+        required: true,
+    },
+    sender_crushname: {
+        type: String,
+        required: true,
     },
     email: {
         type: String,
         required:true,
     },
-    email: {
-        type: String,
-        required:true,
-        unique:true,
-    },
-    job_title: {
-        type: String,
-    },
-    gender: {
+    sender_from_id: {
         type: String,
     },
     },

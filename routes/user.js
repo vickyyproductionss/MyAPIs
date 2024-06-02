@@ -1,6 +1,6 @@
 const express = require('express');
-const {handleGetAllUsers,handleCreateNewUser, handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI} = require('../controllers/user');
-
+const {handleGetAllUsers,handleGetUserProfilePicture,handleCreateNewUser, handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI} = require('../controllers/user');
+const {incrementAppOpen} = require("../controllers/AppOpen")
 const router = express.Router();
 
 //REST APIs
@@ -15,5 +15,12 @@ router
 router
     .route("/ui")
     .get(handleGetAllUsersInUI);
+
+router
+    .route("/username")
+    .get(handleGetUserProfilePicture);
+
+
+router.route("/appopen").get(incrementAppOpen);
 
 module.exports = router;

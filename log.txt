@@ -96,3 +96,23 @@
 1716183265729:::1POST:/api/support/get/server
 
 1716183269868:::1GET:/api/support/get/server
+
+1716716203452:::1GET:/api/user/username/
+
+1716716256053:::1GET:/api/users/username/
+
+1716716299035:::1GET:/api/users/username/
+
+1716716359235:::1GET:/api/users/username/
+
+1716716397178:::1GET:/api/users/username/
+
+1716716449195:::1GET:/api/users/username/
+
+1716716686682:::1GET:/api/users/username/
+
+1716716874619:::1GET:/api/support/get/server
+
+1716716903152:::1GET:/api/support/get/server
+
+1716716907095:::1GET:/api/support/get/server

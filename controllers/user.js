@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const axios = require('axios');
 async function handleGetAllUsers(req,res)
 {
     const allDbUsers = await User.find({});
@@ -25,24 +26,21 @@ async function handleCreateNewUser(req,res)
     const body = req.body;
     if(
         !body ||
-        !body.first_name ||
-        !body.last_name ||
+        !body.sender_name ||
+        !body.sender_crushname ||
         !body.email ||
-        !body.gender ||
-        !body.job_title
+        !body.sender_id
     )
     {
-        return res.status(400).json({msg:"All fields are req"});
+        return res.status(400).json({msg:"All Fields are Required"});
     }
     const result = await User.create({
-        firstname : body.first_name,
-        lastname:body.last_name,
+        sender_id : body.sender_id,
+        sender_name:body.sender_name,
         email:body.email,
-        gender:body.gender,
-        job_title:body.job_title,
+        sender_crushname:body.sender_crushname,
+        sender_from_id:body.sender_from_id || "Self",
     });
-
-    console.log('result',result)
 
     return res.status(201).json({msg: "success",id:result._id});
 }
@@ -57,6 +55,19 @@ async function handleGetAllUsersInUI(req,res)
         res.status(500).send('Server Error');
       }
 }
+async function handleGetUserProfilePicture(req,res)
+{
+    const username = "vickyy_chaudharyy";
+    try {
+        const response = await axios.get(`https://www.instagram.com/${username}/?__a=1`);
+        const profileData = response.data.graphql.user;
+        const profilePictureUrl = profileData.profile_pic_url_hd; // Use profile_pic_url for lower resolution picture
+        return profilePictureUrl;
+    } catch (error) {
+        console.error('Error fetching profile picture:', error.response.data);
+        return null;
+    }
+}
 module.exports = {
-    handleGetAllUsers,handleCreateNewUser,handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI
+    handleGetAllUsers,handleCreateNewUser,handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI,handleGetUserProfilePicture,
 }
