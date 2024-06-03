@@ -16,8 +16,8 @@ async function incrementAppOpen(req, res) {
 }
 async function fetchprankedusers(req, res) {
   try {
-    const {senderFromId} = req.query;
-    const users = await User.find({ sender_from_id: senderFromId });
+    const { senderid } = req.query;
+    const users = await User.find({ sender_from_id: senderid });
 
     if (users.length === 0) {
       return res
