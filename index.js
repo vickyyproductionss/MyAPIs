@@ -4,6 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const userRouter = require("./routes/user");
 const supportRouter = require("./routes/support");
+const bodyparse = require('body-parser')
 const { connectMongoDb } = require("./connection");
 const { logReqRes } = require("./middlewares");
 
@@ -11,10 +12,12 @@ connectMongoDb(process.env.MONGO_URI).then(() => {console.log("Connected to Mong
 //connectMongoDb(process.env.MONGO_URI).then(() => {console.log("Connected to MongoDB");})
 app.set('view engine', 'ejs');
 //Middleware - Plugin
-app.use(express.urlencoded ({extended: false}))
+app.use(express.urlencoded ({extended: false}));
+app.use(bodyparse.json());
 app.use(logReqRes("log.txt"));
 
 //Routes
+
 app.use('/api/users',userRouter);
 app.use('/api/support',supportRouter);
 
