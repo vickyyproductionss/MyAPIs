@@ -25,7 +25,7 @@ async function fetchprankedusers(req, res) {
         .json({ message: "No users found with the specified sender_from_id" });
     }
 
-    res.status(200).json({ message:"Success",data: users });
+    res.status(200).send({ message:"Success",data: users });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
   }
