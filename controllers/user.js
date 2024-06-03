@@ -34,6 +34,10 @@ async function handleCreateNewUser(req,res)
     {
         return res.status(400).json({msg:"All Fields are Required",data:body});
     }
+    const existingUser = await User.findOne({ sender_id: body.sender_id });
+    if (existingUser) {
+      return res.status(200).json({ msg: "User already exists" });
+    }
     const result = await User.create({
         sender_id : body.sender_id,
         sender_name:body.sender_name,
