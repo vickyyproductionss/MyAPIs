@@ -16,7 +16,7 @@ async function incrementAppOpen(req, res) {
 }
 async function fetchprankedusers(req, res) {
   try {
-    const senderFromId = req.params.senderFromId;
+    const {senderFromId} = req.query;
     const users = await User.find({ sender_from_id: senderFromId });
 
     if (users.length === 0) {
@@ -25,7 +25,7 @@ async function fetchprankedusers(req, res) {
         .json({ message: "No users found with the specified sender_from_id" });
     }
 
-    res.status(200).send({ message:"Success",data: users });
+    res.status(200).send({ message: "Success", data: users });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
   }
