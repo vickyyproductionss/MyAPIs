@@ -32,7 +32,7 @@ async function handleCreateNewUser(req,res)
         !body.sender_id
     )
     {
-        return res.status(400).json({msg:"All Fields are Required"});
+        return res.status(400).json({msg:"All Fields are Required",data:body});
     }
     const result = await User.create({
         sender_id : body.sender_id,
