@@ -1,6 +1,6 @@
 const express = require('express');
 const {handleGetAllUsers,handleGetUserProfilePicture,handleCreateNewUser, handleGetUserById,handleUpdateUserById,handleDeleteUserById,handleGetAllUsersInUI} = require('../controllers/user');
-const {incrementAppOpen} = require("../controllers/AppOpen")
+const {incrementAppOpen,fetchprankedusers} = require("../controllers/AppOpen")
 const {incrementHitCounter} = require('../controllers/hitCounterController');
 const router = express.Router();
 
@@ -17,6 +17,7 @@ router
 
 
 router.route("/appopen").get(incrementAppOpen);
+router.route("/prankedlist").get(fetchprankedusers);
 router.route("/hitlink").get(incrementHitCounter);
 
 module.exports = router;
