@@ -7,7 +7,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 async function CapturePayment(req, res) {
-    const secret = '12345678';
+    const secret = 'jbQzLJantq@m4dq';
     console.log(req.body);
 
     // Generate SHA256 signature
