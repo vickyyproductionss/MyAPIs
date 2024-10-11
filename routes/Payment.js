@@ -4,6 +4,6 @@ const {CapturePayment} = require('../controllers/Payment');
 const router = express.Router();
 
 //REST APIs
-router.route("/payment/verification").post(CapturePayment);
+router.route("/").post(CapturePayment);
 
 module.exports = router;

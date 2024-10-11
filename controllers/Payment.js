@@ -2,7 +2,7 @@ const Payment = require('../models/Payment');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
-
+const app = require('express')()
 app.use(cors());
 app.use(bodyParser.json());
 
