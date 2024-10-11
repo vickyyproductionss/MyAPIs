@@ -14,6 +14,7 @@ async function incrementAppOpen(req, res) {
     res.status(500).json({ message: "Server Error", error });
   }
 }
+
 async function fetchprankedusers(req, res) {
   try {
     const { senderid } = req.query;
