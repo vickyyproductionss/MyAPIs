@@ -3,13 +3,10 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
 const paymentRouter = require("./routes/Payment");
-const bodyparse = require('body-parser');
-const { logReqRes } = require("./middlewares");
+const bodyParser = require('body-parser');
 
 // Middleware
 app.set('view engine', 'ejs');
-app.use(bodyparse.json());
-app.use(logReqRes("log.txt"));
 // Use body-parser middleware
 app.use(bodyParser.json()); // For parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
