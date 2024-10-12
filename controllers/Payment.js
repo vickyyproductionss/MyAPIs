@@ -70,10 +70,7 @@ async function CreatePaymentLink(req, res) {
 
 async function CapturePayment(req, res) {
     const secret = 'jbQzLJantq@m4dq';
-    console.log(req.body);
-
     const db = admin.firestore();
-
 
     // Generate SHA256 signature
     const shasum = crypto.createHmac('sha256', secret);
@@ -89,7 +86,7 @@ async function CapturePayment(req, res) {
             // Save the payment to Firestore
             const paymentRef = db.collection('Payments').doc();  // 'payments' is the collection name
             await paymentRef.set(req.body);
-            res.json({ status: 'ok', message: 'Payment data saved to Firestore' });
+            res.status(200).json({ status: 'ok', message: 'Payment data saved to Firestore' });
 
         } catch (error) {
             console.error('Error saving payment to MongoDB:', error);
