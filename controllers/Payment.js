@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const app = require('express')()
 app.use(cors());
 app.use(bodyParser.json());
+const admin = require('firebase-admin');
 
 const Razorpay = require('razorpay');
 const axios = require('axios');
@@ -17,6 +18,8 @@ const razorpayInstance = new Razorpay({
 
 async function CreatePaymentLink(req, res) {
     const { amount, customerName, customerEmail, customerContact, description } = req.query;
+
+    const db = admin.firestore();
 
     try {
         // Create a payment link directly
@@ -38,12 +41,21 @@ async function CreatePaymentLink(req, res) {
             notes: {
                 policy_name: "Jeevan Bima"
             },
-            callback_url: "https://my-ap-isasdasd-theta.vercel.app/api/payments/verification",
-            callback_method: "get"
+            callback_url: "https://my-ap-is-theta.vercel.app/api/payments/verification",
+            callback_method: "post"
         };
 
         // Create the payment link
         const paymentLink = await razorpayInstance.paymentLink.create(paymentLinkOptions);
+
+        try {
+            // Save the payment to Firestore
+            const paymentRef = db.collection('PaymentLinks').doc();  // 'payments' is the collection name
+            await paymentRef.set(paymentLink);
+
+        } catch (error) {
+            console.error('Error saving payment to MongoDB:', error);
+        }
 
         // Send the payment link back to the client
         res.json({
@@ -60,6 +72,9 @@ async function CreatePaymentLink(req, res) {
 async function CapturePayment(req, res) {
     const secret = 'jbQzLJantq@m4dq';
     console.log(req.body);
+
+    const db = admin.firestore();
+
 
     // Generate SHA256 signature
     const shasum = crypto.createHmac('sha256', secret);
@@ -78,8 +93,11 @@ async function CapturePayment(req, res) {
         });
 
         try {
-            await newPayment.save();  // Save the payment to MongoDB
-            res.json({ status: 'ok', message: 'Payment data saved to MongoDB' });
+            // Save the payment to Firestore
+            const paymentRef = db.collection('Payments').doc();  // 'payments' is the collection name
+            await paymentRef.set(newPayment);
+            res.json({ status: 'ok', message: 'Payment data saved to Firestore' });
+
         } catch (error) {
             console.error('Error saving payment to MongoDB:', error);
             res.status(500).json({ status: 'error', message: 'Failed to save payment data' });
