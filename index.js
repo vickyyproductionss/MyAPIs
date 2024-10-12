@@ -8,9 +8,12 @@ const { logReqRes } = require("./middlewares");
 
 // Middleware
 app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: false }));
 app.use(bodyparse.json());
 app.use(logReqRes("log.txt"));
+// Use body-parser middleware
+app.use(bodyParser.json()); // For parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+
 
 var admin = require("firebase-admin");
 
