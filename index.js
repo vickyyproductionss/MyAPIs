@@ -2,8 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
-const userRouter = require("./routes/user");
-const supportRouter = require("./routes/support");
 const paymentRouter = require("./routes/Payment");
 const bodyparse = require('body-parser')
 const { connectMongoDb } = require("./connection");
@@ -18,9 +16,6 @@ app.use(bodyparse.json());
 app.use(logReqRes("log.txt"));
 
 //Routes
-
-app.use('/api/users',userRouter);
-app.use('/api/support',supportRouter);
 app.use('/api/payments/verification',paymentRouter);
 
 app.listen(PORT,()=>{
