@@ -23,8 +23,7 @@ async function CreatePaymentLink(req, res) {
         const paymentLinkOptions = {
             amount: parseInt(amount) * 100, // Amount in paise
             currency: "INR",
-            accept_partial: true, // Accept partial payments
-            first_min_partial_amount: 1000, // Minimum partial payment amount (in paise)
+            accept_partial: false, // Accept partial payments
             description: description || "Payment for TEST purpose",
             customer: {
                 name: customerName || "Default Customer",
@@ -39,8 +38,8 @@ async function CreatePaymentLink(req, res) {
             notes: {
                 policy_name: "Jeevan Bima"
             },
-            callback_url: "https://your-server.com/callback",
-            callback_method: "get"
+            callback_url: "https://my-ap-is-theta.vercel.app/api/payments/verification",
+            callback_method: "post"
         };
 
         // Create the payment link
