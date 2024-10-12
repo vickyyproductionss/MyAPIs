@@ -15,55 +15,45 @@ const razorpayInstance = new Razorpay({
     key_secret: 'uUvTHe0adjiUeXkMuDbB104y'
 });
 
-async function CreateOrderAndPaymentLink(req, res) {
-    const { amount, currency } = req.query; // Get amount and currency from query params
+async function CreatePaymentLink(req, res) {
+    const { amount, customerName, customerEmail, customerContact, description } = req.query;
 
     try {
-        // Step 1: Create an Order
-        const options = {
-            amount: parseInt(amount) * 100, // Razorpay deals with paise
-            currency: currency || 'INR',
-            receipt: `receipt_order_${Math.random() * 1000}`,
-        };
-
-        const order = await razorpayInstance.orders.create(options);
-
-        // Step 2: Create a Payment Link using the order_id
+        // Create a payment link directly
         const paymentLinkOptions = {
-            amount: order.amount, // Amount in paise
-            currency: order.currency,
-            accept_partial: false,
-            reference_id: order.id, // Reference to the order ID
-            description: "Payment for order #" + order.id,
+            amount: parseInt(amount) * 100, // Amount in paise
+            currency: "INR",
+            accept_partial: true, // Accept partial payments
+            first_min_partial_amount: 1000, // Minimum partial payment amount (in paise)
+            description: description || "Payment for TEST purpose",
             customer: {
-                name: "Customer Name",
-                email: "customer@example.com",
-                contact: "9876543210"
+                name: customerName || "Default Customer",
+                email: customerEmail || "customer@example.com",
+                contact: customerContact || "+919000000000"
             },
             notify: {
-                email: true,
-                sms: true
+                sms: true,
+                email: true
             },
-            callback_url: "https://my-ap-is-theta.vercel.app/api/payments/verification", // Where the payment confirmation will be sent
-            callback_method: "post"
+            reminder_enable: true,
+            notes: {
+                policy_name: "Jeevan Bima"
+            },
+            callback_url: "https://your-server.com/callback",
+            callback_method: "get"
         };
 
-        const paymentLinkResponse = await axios.post('https://api.razorpay.com/v1/payment_links', paymentLinkOptions, {
-            auth: {
-                username: 'rzp_test_HNi8kaKf7tE6DM',
-                password: 'uUvTHe0adjiUeXkMuDbB104y'
-            }
-        });
+        // Create the payment link
+        const paymentLink = await razorpayInstance.paymentLink.create(paymentLinkOptions);
 
-        // Step 3: Send the Payment Link back to the client
+        // Send the payment link back to the client
         res.json({
-            order_id: order.id,
-            payment_link: paymentLinkResponse.data.short_url, // This is the link you can open in the browser
+            payment_link: paymentLink.short_url,
             message: 'Payment link created successfully'
         });
     } catch (error) {
-        console.error('Error creating Razorpay order or payment link:', error);
-        res.status(500).json({ status: 'error', message: 'Failed to create order or payment link' });
+        console.error('Error creating payment link:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to create payment link'  + error});
     }
 }
 
@@ -101,5 +91,5 @@ async function CapturePayment(req, res) {
 }
 
 module.exports = {
-    CapturePayment,CreateOrderAndPaymentLink
+    CapturePayment, CreatePaymentLink
 };

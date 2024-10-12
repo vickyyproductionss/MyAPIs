@@ -154,3 +154,21 @@
 1728678329796:::1POST:/api/payments/payment/verification
 
 1728678395811:::1POST:/api/payments/payment/verification
+
+1728711675035:::1GET:/api/payments/payment/verification
+
+1728711747385:::1GET:/api/payments/verification
+
+1728711792653:::1GET:/api/payments/verification
+
+1728711834088:::1GET:/api/payments/verification
+
+1728712173169:::1GET:/api/payments/verification
+
+1728712647096:::1GET:/api/payments/verification
+
+1728712662572:::1GET:/api/payments/verification
+
+1728712672156:::1GET:/api/payments/verification
+
+1728712715141:::1GET:/api/payments/verification
