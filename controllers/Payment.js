@@ -85,16 +85,10 @@ async function CapturePayment(req, res) {
     if (digest === req.headers['x-razorpay-signature']) {
         console.log('request is legit', JSON.stringify(req.body, null, 4));
 
-        // Create a new Payment instance and save it to MongoDB
-        const newPayment = new Payment({
-            paymentData: req.body, // Assuming your Payment schema has a 'paymentData' field to store the data
-            createdAt: new Date()
-        });
-
         try {
             // Save the payment to Firestore
             const paymentRef = db.collection('Payments').doc();  // 'payments' is the collection name
-            await paymentRef.set(newPayment);
+            await paymentRef.set(req.body);
             res.json({ status: 'ok', message: 'Payment data saved to Firestore' });
 
         } catch (error) {
