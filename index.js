@@ -7,8 +7,8 @@ const bodyparse = require('body-parser')
 const { connectMongoDb } = require("./connection");
 const { logReqRes } = require("./middlewares");
 
-connectMongoDb("mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.2").then(() => {console.log("Connected to MongoDB");})
-//connectMongoDb(process.env.MONGO_URI).then(() => {console.log("Connected to MongoDB");})
+//connectMongoDb("mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.2").then(() => {console.log("Connected to MongoDB");})
+connectMongoDb(process.env.MONGO_URI).then(() => {console.log("Connected to MongoDB");})
 app.set('view engine', 'ejs');
 //Middleware - Plugin
 app.use(express.urlencoded ({extended: false}));
