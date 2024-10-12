@@ -1,4 +1,3 @@
-const Payment = require('../models/Payment');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
