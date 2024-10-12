@@ -39,9 +39,7 @@ async function CreatePaymentLink(req, res) {
             reminder_enable: true,
             notes: {
                 policy_name: "Jeevan Bima"
-            },
-            callback_url: "https://my-ap-is-theta.vercel.app/api/payments/verification",
-            callback_method: "get"
+            }
         };
 
         // Create the payment link
