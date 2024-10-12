@@ -38,8 +38,8 @@ async function CreatePaymentLink(req, res) {
             notes: {
                 policy_name: "Jeevan Bima"
             },
-            //callback_url: "https://my-ap-is-theta.vercel.app/api/payments/verification",
-            //callback_method: "post"
+            callback_url: "https://my-ap-isasdasd-theta.vercel.app/api/payments/verification",
+            callback_method: "get"
         };
 
         // Create the payment link
