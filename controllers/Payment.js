@@ -16,7 +16,7 @@ const razorpayInstance = new Razorpay({
 });
 
 async function CreatePaymentLink(req, res) {
-    const { amount, customerName, customerEmail, customerContact, description } = req.query;
+    const { amount, customerName, customerEmail, customerContact, description, userid } = req.query;
 
     const db = admin.firestore();
 
@@ -38,7 +38,7 @@ async function CreatePaymentLink(req, res) {
             },
             reminder_enable: true,
             notes: {
-                policy_name: "Jeevan Bima"
+                user_id: userid
             }
         };
 
