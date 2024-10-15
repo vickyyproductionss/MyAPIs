@@ -72,6 +72,7 @@ async function findContact(contact) {
         const contacts = response.data.items;
         return contacts.length > 0 ? contacts[0] : null;
     } catch (error) {
+        console.error('Error searching contacts:', error);
         throw new Error('Failed to fetch contacts');
     }
 }
