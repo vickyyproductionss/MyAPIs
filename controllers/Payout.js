@@ -1,6 +1,7 @@
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid'); // Import UUID for generating idempotency keys
 const app = require('express')()
 app.use(cors());
 app.use(bodyParser.json());
@@ -15,8 +16,7 @@ const razorpayInstance = new Razorpay({
     key_secret: 'uUvTHe0adjiUeXkMuDbB104y'
 });
 
-
-// New Payout function
+// New Payout function with Idempotency Key
 async function createPayout(req, res) {
     const { name, email, contact, accountNumber, ifsc, upiId, amount, userid } = req.body;
     const db = admin.firestore();
@@ -32,10 +32,12 @@ async function createPayout(req, res) {
 
         // Step 3: Create a payout request (UPI or Bank Account)
         let payout;
+        const idempotencyKey = uuidv4();  // Generate a unique idempotency key
+
         if (upiId) {
-            payout = await createUPIPayout(existingContact.id, upiId, amount);
+            payout = await createUPIPayout(existingContact.id, upiId, amount, idempotencyKey);
         } else if (accountNumber && ifsc) {
-            payout = await createBankPayout(existingContact.id, accountNumber, ifsc, amount);
+            payout = await createBankPayout(existingContact.id, accountNumber, ifsc, amount, idempotencyKey);
         } else {
             throw new Error('Please provide either UPI ID or Bank Account details');
         }
@@ -46,6 +48,7 @@ async function createPayout(req, res) {
             payoutDetails: payout,
             userId: userid,
             createdAt: new Date(),
+            idempotencyKey: idempotencyKey  // Save the idempotency key in Firestore
         });
 
         res.json({ status: 'success', payout });
@@ -89,7 +92,7 @@ async function createNewContact(name, email, contact) {
 }
 
 // Helper function to create a Bank Account payout request
-async function createBankPayout(contactId, accountNumber, ifsc, amount) {
+async function createBankPayout(contactId, accountNumber, ifsc, amount, idempotencyKey) {
     try {
         const payout = await razorpayInstance.payouts.create({
             account_number: 'your_account_number', // Replace with your linked Razorpay account
@@ -109,6 +112,10 @@ async function createBankPayout(contactId, accountNumber, ifsc, amount) {
             mode: 'IMPS', // Or 'NEFT', 'RTGS'
             purpose: 'payout',
             queue_if_low_balance: true,
+        }, {
+            headers: {
+                'X-Payout-Idempotency': idempotencyKey  // Add idempotency key header
+            }
         });
 
         return payout;
@@ -118,7 +125,7 @@ async function createBankPayout(contactId, accountNumber, ifsc, amount) {
 }
 
 // Helper function to create a UPI payout request
-async function createUPIPayout(contactId, upiId, amount) {
+async function createUPIPayout(contactId, upiId, amount, idempotencyKey) {
     try {
         const payout = await razorpayInstance.payouts.create({
             account_number: 'your_account_number', // Replace with your linked Razorpay account
@@ -136,6 +143,10 @@ async function createUPIPayout(contactId, upiId, amount) {
             mode: 'UPI',
             purpose: 'payout',
             queue_if_low_balance: true,
+        }, {
+            headers: {
+                'X-Payout-Idempotency': idempotencyKey  // Add idempotency key header
+            }
         });
 
         return payout;
