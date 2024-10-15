@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
 const paymentRouter = require("./routes/Payment");
+const payoutRouter = require("./routes/Payout");
 const bodyParser = require('body-parser');
 
 // Middleware
@@ -37,7 +38,7 @@ admin.initializeApp({
 
 // Routes
 app.use('/api/payments/verification', paymentRouter);
-
+app.use('/api/payouts/verification', payoutRouter);
 app.listen(PORT, () => {
     console.log(`Server started on PORT ${PORT}`);
 });
