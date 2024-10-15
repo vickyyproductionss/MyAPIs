@@ -64,8 +64,8 @@ async function findContact(contact) {
     try {
         const response = await axios.get(`https://api.razorpay.com/v1/contacts?contact=${contact}`, {
             auth: {
-                username: 'rzp_test_HNi8kaKf7tE6DM',
-                password: 'uUvTHe0adjiUeXkMuDbB104y',
+                key_id: 'rzp_test_HNi8kaKf7tE6DM',
+                key_secret: 'uUvTHe0adjiUeXkMuDbB104y',
             },
         });
 
