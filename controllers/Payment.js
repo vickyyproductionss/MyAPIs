@@ -15,9 +15,9 @@ const razorpayInstance = new Razorpay({
     key_secret: 'uUvTHe0adjiUeXkMuDbB104y'
 });
 
+// Function to create a payment link
 async function CreatePaymentLink(req, res) {
     const { amount, customerName, customerEmail, customerContact, description, userid } = req.query;
-
     const db = admin.firestore();
 
     try {
@@ -42,16 +42,15 @@ async function CreatePaymentLink(req, res) {
             }
         };
 
-        // Create the payment link
+        // Create the payment link using Razorpay API
         const paymentLink = await razorpayInstance.paymentLink.create(paymentLinkOptions);
 
         try {
-            // Save the payment to Firestore
-            const paymentRef = db.collection('PaymentLinks').doc();  // 'payments' is the collection name
-            await paymentRef.set(paymentLink);
-
+            // Save the payment link to Firestore under `users > (userid) > Payments`
+            const paymentRef = db.collection('Users').doc(userid).collection('PaymentLinks').doc();
+            await paymentRef.set(paymentLink); // Save payment link data to the user's payment collection
         } catch (error) {
-            console.error('Error saving payment to MongoDB:', error);
+            console.error('Error saving payment link to Firestore:', error);
         }
 
         // Send the payment link back to the client
@@ -61,16 +60,16 @@ async function CreatePaymentLink(req, res) {
         });
     } catch (error) {
         console.error('Error creating payment link:', error);
-        res.status(500).json({ status: 'error', message: 'Failed to create payment link'  + error});
+        res.status(500).json({ status: 'error', message: 'Failed to create payment link: ' + error });
     }
 }
 
-
+// Function to capture a payment
 async function CapturePayment(req, res) {
-    const secret = 'jbQzLJantq@m4dq';
+    const secret = 'jbQzLJantq@m4dq';  // Webhook secret key for signature validation
     const db = admin.firestore();
 
-    // Generate SHA256 signature
+    // Generate SHA256 signature for validation
     const shasum = crypto.createHmac('sha256', secret);
     shasum.update(JSON.stringify(req.body));
     const digest = shasum.digest('hex');
@@ -78,16 +77,20 @@ async function CapturePayment(req, res) {
     console.log(digest, req.headers['x-razorpay-signature']);
 
     if (digest === req.headers['x-razorpay-signature']) {
-        console.log('request is legit', JSON.stringify(req.body, null, 4));
+        console.log('Request is legit', JSON.stringify(req.body, null, 4));
 
         try {
-            // Save the payment to Firestore
-            const paymentRef = db.collection('Payments').doc();  // 'payments' is the collection name
-            await paymentRef.set(req.body);
+            // Retrieve the user ID from the notes field of the request body
+            const userid = req.body.payload.payment.entity.notes.user_id;
+
+            // Save the payment data to Firestore under `users > (userid) > Payments`
+            const paymentRef = db.collection('Users').doc(userid).collection('Payments').doc();
+            await paymentRef.set(req.body); // Save the captured payment data to the user's payment collection
+
             res.status(200).json({ status: 'ok', message: 'Payment data saved to Firestore' });
 
         } catch (error) {
-            console.error('Error saving payment to MongoDB:', error);
+            console.error('Error saving payment data to Firestore:', error);
             res.status(500).json({ status: 'error', message: 'Failed to save payment data' });
         }
     } else {

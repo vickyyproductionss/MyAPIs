@@ -2,7 +2,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid'); // Import UUID for generating idempotency keys
-const app = require('express')()
+const app = require('express')();
 app.use(cors());
 app.use(bodyParser.json());
 const admin = require('firebase-admin');
@@ -18,7 +18,7 @@ const razorpayInstance = new Razorpay({
 
 // New Payout function with Idempotency Key
 async function createPayout(req, res) {
-    const { name, email, contact, accountNumber, ifsc, upiId, amount, userid } = req.body;
+    const { name, email, contact, amount, userid, referenceId, narration, notes, account_number, description } = req.body;
     const db = admin.firestore();
 
     try {
@@ -30,32 +30,25 @@ async function createPayout(req, res) {
             existingContact = await createNewContact(name, email, contact);
         }
 
-        // Step 3: Create a payout request (UPI or Bank Account)
-        let payout;
-        const idempotencyKey = uuidv4();  // Generate a unique idempotency key
+        // Step 3: Create a payout link
+        const idempotencyKey = uuidv4(); // Generate a unique idempotency key
 
-        if (upiId) {
-            payout = await createUPIPayout(existingContact.id, upiId, amount, idempotencyKey);
-        } else if (accountNumber && ifsc) {
-            payout = await createBankPayout(existingContact.id, accountNumber, ifsc, amount, idempotencyKey);
-        } else {
-            throw new Error('Please provide either UPI ID or Bank Account details');
-        }
+        const payoutLink = await createPayoutLink(existingContact.id, amount, idempotencyKey, referenceId, narration, notes, account_number, description);
 
-        // Step 4: Save the payout details in Firestore
+        // Step 4: Save the payout link details in Firestore
         const payoutRef = db.collection('Payouts').doc();  // 'Payouts' is the collection name
         await payoutRef.set({
-            payoutDetails: payout,
+            payoutDetails: payoutLink,
             userId: userid,
             createdAt: new Date(),
             idempotencyKey: idempotencyKey  // Save the idempotency key in Firestore
         });
 
-        res.json({ status: 'success', payout });
+        res.json({ status: 'success', payoutLink });
 
     } catch (error) {
-        console.error('Error creating payout:', error);
-        res.status(500).json({ status: 'error', message: 'Failed to create payout: ' + error.message });
+        console.error('Error creating payout link:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to create payout link: ' + error.message });
     }
 }
 
@@ -64,8 +57,8 @@ async function findContact(contact) {
     try {
         const response = await axios.get(`https://api.razorpay.com/v1/contacts?contact=${contact}`, {
             auth: {
-                key_id: 'rzp_test_HNi8kaKf7tE6DM',
-                key_secret: 'uUvTHe0adjiUeXkMuDbB104y',
+                username: 'rzp_test_HNi8kaKf7tE6DM',
+                password: 'uUvTHe0adjiUeXkMuDbB104y',
             },
         });
 
@@ -80,79 +73,59 @@ async function findContact(contact) {
 // Helper function to create a new contact
 async function createNewContact(name, email, contact) {
     try {
-        const newContact = await razorpayInstance.contacts.create({
+        const response = await axios.post('https://api.razorpay.com/v1/contacts', {
             name,
             email,
             contact,
             type: 'employee', // Can be 'vendor', 'customer', etc.
+        }, {
+            auth: {
+                username: 'rzp_test_HNi8kaKf7tE6DM',  // Your Razorpay key_id
+                password: 'uUvTHe0adjiUeXkMuDbB104y', // Your Razorpay key_secret
+            },
         });
-        return newContact;
+
+        return response.data;  // Return the created contact details
     } catch (error) {
-        throw new Error('Failed to create contact');
+        console.error('Failed to create contact:', error.response ? error.response.data : error.message);
+        throw new Error('Failed to create contact: ' + (error.response ? error.response.data.error.description : error.message));
     }
 }
 
-// Helper function to create a Bank Account payout request
-async function createBankPayout(contactId, accountNumber, ifsc, amount, idempotencyKey) {
+// Helper function to create a payout link using POST method
+async function createPayoutLink(contactId, amount, idempotencyKey, referenceId, narration, notes,account_number, description) {
     try {
-        const payout = await razorpayInstance.payouts.create({
-            account_number: 'your_account_number', // Replace with your linked Razorpay account
-            fund_account: {
-                account_type: 'bank_account',
-                bank_account: {
-                    name: 'Account Holder Name', // Replace with actual account holder's name
-                    account_number: accountNumber,
-                    ifsc: ifsc,
-                },
-                contact: {
-                    id: contactId,
-                },
+        // Prepare the payout link data according to Razorpay's API requirements
+        const payoutLinkData = {
+            account_number: account_number, // Replace with your linked Razorpay account
+            contact: {
+                id: contactId,  // Use the correct contact ID
             },
             amount: amount * 100, // Amount in paise
             currency: 'INR',
-            mode: 'IMPS', // Or 'NEFT', 'RTGS'
             purpose: 'payout',
-            queue_if_low_balance: true,
-        }, {
-            headers: {
-                'X-Payout-Idempotency': idempotencyKey  // Add idempotency key header
-            }
-        });
+            reference_id: referenceId,  // Reference ID for tracking
+            narration: narration,       // Purpose or description for the payout
+            notes: notes,               // Additional notes if necessary
+            description: description
+        };
 
-        return payout;
-    } catch (error) {
-        throw new Error('Failed to create bank account payout');
-    }
-}
-
-// Helper function to create a UPI payout request
-async function createUPIPayout(contactId, upiId, amount, idempotencyKey) {
-    try {
-        const payout = await razorpayInstance.payouts.create({
-            account_number: 'your_account_number', // Replace with your linked Razorpay account
-            fund_account: {
-                account_type: 'vpa',
-                vpa: {
-                    address: upiId, // UPI ID of the user
-                },
-                contact: {
-                    id: contactId,
-                },
+        // Send a POST request to create the payout link
+        const response = await axios.post('https://api.razorpay.com/v1/payout-links', payoutLinkData, {
+            auth: {
+                username: 'rzp_test_HNi8kaKf7tE6DM',  // Your Razorpay key_id
+                password: 'uUvTHe0adjiUeXkMuDbB104y', // Your Razorpay key_secret
             },
-            amount: amount * 100, // Amount in paise
-            currency: 'INR',
-            mode: 'UPI',
-            purpose: 'payout',
-            queue_if_low_balance: true,
-        }, {
             headers: {
-                'X-Payout-Idempotency': idempotencyKey  // Add idempotency key header
-            }
+                'Content-Type': 'application/json',
+                'X-Payout-Idempotency': idempotencyKey // Add idempotency key header
+            },
         });
 
-        return payout;
+        return response.data; // Return the created payout link details
     } catch (error) {
-        throw new Error('Failed to create UPI payout');
+        console.error('Failed to create payout link:', error.response ? error.response.data : error.message);
+        throw new Error('Failed to create payout link: ' + (error.response ? error.response.data.error.description : error.message));
     }
 }
 
