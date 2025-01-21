@@ -27,6 +27,11 @@ if (process.env.FIREBASE_PROJECT_ID) {
     serviceAccount = require("./ServiceAccount.json");
 }
 
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://safez-11f54.firebaseio.com"  // Replace <your-project-id> with your actual Firebase project ID
+});
+
 // Function to generate random data
 function generateRandomData() {
     const randomData = {
