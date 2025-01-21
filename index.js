@@ -37,27 +37,43 @@ function generateRandomData() {
     return randomData;
 }
 
-// Function to write random data to Firebase
+// Function to generate a random number (to append to the 'User_' prefix)
+function generateRandomNumber() {
+    return Math.floor(Math.random() * 1000000); // Generates a random number between 0 and 999999
+}
+
+// Function to write random data to Firebase with a unique node name (e.g., User_123123)
 function writeRandomData() {
     const randomData = generateRandomData();
+    const randomNumber = generateRandomNumber();  // Generate random number for unique user key
+    const userKey = `User_${randomNumber}`;  // Generate the unique user key
+
     const ref = admin.database().ref('randomData'); // Reference to 'randomData' in Firebase
-    ref.push(randomData, (error) => {
+    
+    // Create the node with the custom key (e.g., User_123123)
+    const newNodeRef = ref.child(userKey);  // Use the custom user key as the node
+    
+    // Write random data to the newly created node
+    newNodeRef.set(randomData, (error) => {
         if (error) {
             console.error('Error writing data to Firebase:', error);
         } else {
-            console.log('Random data written to Firebase:', randomData);
+            console.log('Random data written to Firebase at node:', userKey);
+            console.log('Data:', randomData);
         }
     });
 }
 
-// Function to read random data from Firebase
-function readRandomData() {
+// Function to read random data from Firebase (based on specific user node, e.g., User_123123)
+function readRandomData(userKey) {
     const ref = admin.database().ref('randomData'); // Reference to 'randomData' in Firebase
-    ref.once('value', (snapshot) => {
+    
+    // Read the data from the specific node (using userKey like 'User_123123')
+    ref.child(userKey).once('value', (snapshot) => {
         if (snapshot.exists()) {
-            console.log('Random data from Firebase:', snapshot.val());
+            console.log(`Random data from Firebase at ${userKey}:`, snapshot.val());
         } else {
-            console.log('No random data found in Firebase');
+            console.log(`No data found for ${userKey}`);
         }
     });
 }
