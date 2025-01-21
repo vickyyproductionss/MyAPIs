@@ -51,7 +51,7 @@ function generateRandomNumber() {
 function writeRandomData() {
     const randomData = generateRandomData();
     const randomNumber = generateRandomNumber();  // Generate random number for unique user key
-    const userKey = `User_121212`;  // Generate the unique user key
+    const userKey = `HelloKUNDUUUU`;  // Generate the unique user key
 
     const ref = admin.database().ref('randomData'); // Reference to 'randomData' in Firebase
     
@@ -94,9 +94,8 @@ app.listen(PORT, () => {
 
 // Run 10 times every second (100 milliseconds interval)
 setInterval(() => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 2; i++) {
         // Perform write and read 10 times within 1 second
         writeRandomData();
-        readRandomData('User_123456'); // You can change the userKey as needed
     }
-}, 100); // Run every 100 milliseconds (10 times per second)
+}, 200); // Run every 100 milliseconds (10 times per second)
