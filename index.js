@@ -5,17 +5,14 @@ const PORT = process.env.PORT || 4000;
 const paymentRouter = require("./routes/Payment");
 const payoutRouter = require("./routes/Payout");
 const bodyParser = require('body-parser');
+const admin = require("firebase-admin");
 
 // Middleware
 app.set('view engine', 'ejs');
-// Use body-parser middleware
 app.use(bodyParser.json()); // For parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 
-
-var admin = require("firebase-admin");
-
-// Check if running in Vercel environment
+// Firebase Initialization
 let serviceAccount;
 
 if (process.env.FIREBASE_PROJECT_ID) {
@@ -23,22 +20,62 @@ if (process.env.FIREBASE_PROJECT_ID) {
     serviceAccount = {
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCppw5xp46mfpjF\nwv10fXpd+EH/0gpp3ZzOZ82cVLar0DmvF2bRYMf5Z+jAxulBB25ghNthL1kh/93L\nE+FKWtTC2Y7m5ApmZlDwy+/kdinpmT07/6FqpWrkUJSrdpWoIZ3NEUyw2nTBrpQg\nbbFC5yfrzg3Q5XFULSv3hzDvf3vjGrfYPNjAHlS+4+0n53uB05rt+VyBi2SIAHEy\njAKSwcCD/sxgKBdlPSVdACple0w8YnQcImhLuZpB5p2vgovzGVOCtAN1dEizAdDe\n7yv6jU60lCVJUm5ZuV74oYIhd13SU6kmBL4wWgjOn2NSNcxp1LWBOnSvuij4kho6\nCWdDP4lJAgMBAAECggEAMBwwy2hB2tNBzas7JwLCZc2WIc7VpynyYtIrC682Ukjt\nYsrXHH8+lmqyJaEC2q8ZzQNAFzJPK4Ycxo8vr19MwKjjjnSSwnE3eOHMeNRNlHIh\nXFdk1hJs2qxDTNCHJjPKRTIntmts+tPgK8YPo7JbrtIzNs8qMT3SHxLWfMSBRGiD\nlLGJUMWaoQpdcxKnA90OHUgoN6J7Jj2jhc5m9Ehynq0+7UD8aHKN8DvqsrTXObH5\nEqieCNKqLcTK6dr42Bt24VpnOv/GzKSxyK7ciN7IMk6DmFIBnwEq052h9+0x9NpR\nu9KSyor6yCljc6vTiFCAo4ApPb/7ZlDy8pG5h+L89QKBgQC+U6jrkDXewNueuiMG\nYiUxIKIAcuhphJYCSYrAWT+Vq0kTEkQpQngjccW2aFWubJtW+ydbr3bH12dU6oUR\nhUzKjb6QazXdO1m5M9YQbAns62eVPbw7EW2Z6ZnTHbeBPrKCH/KQelGwfXtZkliC\n6apGM8RCQT+OUdtg+Sz7iOaJLwKBgQDkMShVWJXc+co7QylMvlJixb9rYJlwDzy7\niCg3ZvV9PoFw7QdngtyAZlHX3AoN9OXAZ1TgmDquYDVAHDLKNcKFZEtohkUP2NtX\nd4RsEpfPB9MgOcrDyoJ8DnyJ9BJfbyoazcGk4wmGbqS9MJBeAk6mEfVaebO9JwFP\nJ5bYHIaHBwKBgC1ySpadI8/h209GgRCIJPtbIHPc/FQd3bgEGYaeiQlTEirkpLP5\ndDh6dUx+E1+H/XvCkv5YopNLgxgKu+WYH+MJ/6P6ha0i++S2VPos4h3ZhC1lxWmR\nWstytVFs+iF5eCSMPl5zZsgu3mJgCJSR+R+0QrvTWrrAHxNDzJLveKTvAoGAYmT7\n8kkfXchrtkAQd+H9HlAMaR2fK922H1rnlHQV2KpyICJktfKMZ+U21zAvObNmuh8U\nTz/01anwbDN8hwrFVMVZarmy39FvSvjjJcKiqQfDtrqUvvX8a8fHVajjnzkM27/r\nBtFLEyd0a4ucRJ0UErHdrOSbZy2BeAMnHQq3y1MCgYBSZDh35pQN6RssjQKgvUDX\nTSUsfW1ZzkbEnaSgUcjgVSysYOCNzTvzd9wI0BgTg4nW4hg5QW8LqfDmPfGa8k81\nPeUXVIX4WHUHTdeSz3lKVpnjWGUe6k/NvTJXJJSz/4z/AcwHboo1ScTIuJnR9F3g\nWYuAfYY3emIabgDmCKBh7Q==\n-----END PRIVATE KEY-----\n", // Handling newline characters
+        privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDdJDVG9Lqx3yZ8\nq1ViVbecZrcqnf0zmBC+MYoI8mBJsiTlP6uRs2y+AqlOY/R09aeTYt5kWg+qGbQW\nQmm3PCo2TNLNWphm2pNjhlYZtRU43tKbQb7kswMHkPA/sUvMopCdrqpVWgYJLKO7\nNdHsq7z8Hs6u1Mfpat+/MrD+Y5JR22nT/yfO8KFU4oADhK/OzfsDenyL1V5Z3N4L\nGNgYLK3EPfmsF8FUCfqdT2CeX39WHX3NC01pS2swXqFXNE7daP5Dhk9oM6REHEvB\nUYYtwlP0HfNqhHUcRDr+e5KHGGlJ8VYp0pab7PSdS6K6oG5merKOdqZ4vcOobX2I\nGG1WUZA9AgMBAAECggEAOEepw3gvN2uKWPolzdPw2b4OaasxsHrH8A+diK9esALF\nfw6YNImMaEM3IXsw0L9gOZNU9Aczq1/FRFD8pKSMPauJjre6x5pjHlYm/X3ne8TB\npr+xvHSOldNeQWd22gqZcXftY7F4jcctmEyXM3t1qliQ00/V3OLVNMzK3MMsjuYm\nOpMIoeSLroJUmDzQiRLyvxXXAw/peOiW2gG8+Fvx6WGawoBPTPq1FkEGyKk9s9jW\nCZQlH5Mb8CKi3dApfeMy3Vbzqmn/AkPgShxODOYgYq2+W94xG+QTvbqWT+KRqykG\nXfCooEzwzDA0xn/5TR/avqJQJsKO/VSVd+MHWM9ipQKBgQD1jic8c2GUyLP0Quum\ns71jPRgSuKQEV8UN4ToaVeLlGJDvacO7Lr3tcQidnacKdElWP2oWbQSqUI1ngvPT\nktLTOYlpy7M1xsNrVoglNfw0mPtafkYIgPBKfUyifv8KhS+42H3ts2n/+6Yh/4Bt\npb/cO2Qdo40e1xtNgP3MAqOarwKBgQDmjDaChw3Zxf/97BL/1jvswoXeBASaIzbl\n14/F2J8t93Wo9mHPZIScNSF+oSD5qXHk7wt2cOg6hhxrOr/qrPnkXZhBe5GVu2s5\nn6dRUxCe1FdlZ0Ultck9S/7JzmfHJLxvFo9zpip/9uSOPgWnAgFV5Rk25o3Ek2Fm\ntS5B7BSO0wKBgEYowJMoEFh3Y9tFh5kQv+rr2MX4lXxcK4REttoxceutMjQFjxQb\nTc7avfByy/hTs2R+J+ySZ4PWEiDiLJJl3/DT/qwItIKH8OvpRGsFWrMYhrCbZZ0m\nYgGWfV/sUyiJV1JEIO7alU27dANAwkwR0Ji3K2rAgSCvqzBgy6MPmfknAoGAMmD3\nVGSQuULUIregmzlEVQNY31//ZXNGfskxCKnCdvf5RRe53ej4NW5CyHoLS6MkWUOH\nPLWFeaxur1viLjToUmfFaqHG+XJABxKFLHc7TYnXIziC2q+zrupZXd31vYWgi6Hh\nbQMljFr2LMMO1yTQB+YNMXsGBauzAA+dcRhWkbMCgYAFSPKw2DVX2Cwg7ueXGF9/\nIAqqfyp8URjnczTw9tg8DA8XhC98rfaxpTk+L7xG0a/SKzhmxHVIZ7ICm4ZAxmwa\nsEV0Y8pv+M4Tv1q334HalRYmvBSMxQd8S5MBxP4tsI+2km50HX/I71yEMFnQFgp7\nHRUBposkUwPA6xWSsV2ZiA==\n-----END PRIVATE KEY-----\n", // Handling newline characters
     };
 } else {
     // Running locally, use the local JSON file
-    serviceAccount = require("./guessthepassword-firebase-adminsdk-b8i7u-1d0f5961cb.json");
+    serviceAccount = require("./ServiceAccount.json");
 }
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://guessthepassword-default-rtdb.firebaseio.com"
-});
+// Function to generate random data
+function generateRandomData() {
+    const randomData = {
+        number: Math.floor(Math.random() * 1000), // Random number between 0-999
+        string: Math.random().toString(36).substring(2, 15), // Random string of characters
+        timestamp: new Date().toISOString() // Current timestamp
+    };
+    return randomData;
+}
 
+// Function to write random data to Firebase
+function writeRandomData() {
+    const randomData = generateRandomData();
+    const ref = admin.database().ref('randomData'); // Reference to 'randomData' in Firebase
+    ref.push(randomData, (error) => {
+        if (error) {
+            console.error('Error writing data to Firebase:', error);
+        } else {
+            console.log('Random data written to Firebase:', randomData);
+        }
+    });
+}
+
+// Function to read random data from Firebase
+function readRandomData() {
+    const ref = admin.database().ref('randomData'); // Reference to 'randomData' in Firebase
+    ref.once('value', (snapshot) => {
+        if (snapshot.exists()) {
+            console.log('Random data from Firebase:', snapshot.val());
+        } else {
+            console.log('No random data found in Firebase');
+        }
+    });
+}
 
 // Routes
 app.use('/api/payments/verification', paymentRouter);
 app.use('/api/payouts/verification', payoutRouter);
+
+// Start Server
 app.listen(PORT, () => {
     console.log(`Server started on PORT ${PORT}`);
 });
+
+// Run 10 times every second (100 milliseconds interval)
+setInterval(() => {
+    for (let i = 0; i < 10; i++) {
+        // Perform write and read 10 times within 1 second
+        writeRandomData();
+        readRandomData();
+    }
+}, 100); // Run every 100 milliseconds (10 times per second)
