@@ -113,8 +113,8 @@ async function createPayoutLink(contactId, amount, idempotencyKey, referenceId, 
         // Send a POST request to create the payout link
         const response = await axios.post('https://api.razorpay.com/v1/payout-links', payoutLinkData, {
             auth: {
-                username: 'rzp_test_HNi8kaKf7tE6DM',  // Your Razorpay key_id
-                password: 'uUvTHe0adjiUeXkMuDbB104y', // Your Razorpay key_secret
+                username: 'rzp_test_uziNN7SQMjyToN',  // Your Razorpay key_id
+                password: '1GJA4TgEk0ZTsm5BwAkGd3VI', // Your Razorpay key_secret
             },
             headers: {
                 'Content-Type': 'application/json',
