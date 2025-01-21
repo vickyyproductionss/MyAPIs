@@ -97,6 +97,6 @@ setInterval(() => {
     for (let i = 0; i < 10; i++) {
         // Perform write and read 10 times within 1 second
         writeRandomData();
-        readRandomData();
+        readRandomData('User_123456'); // You can change the userKey as needed
     }
 }, 100); // Run every 100 milliseconds (10 times per second)
