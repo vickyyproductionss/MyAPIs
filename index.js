@@ -51,7 +51,7 @@ function generateRandomNumber() {
 function writeRandomData() {
     const randomData = generateRandomData();
     const randomNumber = generateRandomNumber();  // Generate random number for unique user key
-    const userKey = `User_${randomNumber}`;  // Generate the unique user key
+    const userKey = `User_121212`;  // Generate the unique user key
 
     const ref = admin.database().ref('randomData'); // Reference to 'randomData' in Firebase
     
